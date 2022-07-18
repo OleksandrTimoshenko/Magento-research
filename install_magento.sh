@@ -7,7 +7,7 @@ DOMAIN_NAME="magento.feature-testing.link"
 
 echo "Install and setup PHP-$PHP_VERSION"
 apt update
-apt install software-properties-common && add-apt-repository ppa:ondrej/php -y
+apt install software-properties-common -y && add-apt-repository ppa:ondrej/php -y
 sleep 15
 apt update
 for package in bcmath common curl fpm gd intl mbstring mysql soap xml xsl zip cli
