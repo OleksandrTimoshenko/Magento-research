@@ -1,0 +1,57 @@
+version: '3'
+services:
+  magento:
+    image: magento
+    build: magento
+    networks:
+      - appnet
+    command: /opt/magento2/start_magento.sh
+    depends_on:
+      - db
+      - elasticsearch
+
+  nginx:
+    build: nginx-front
+    ports:
+      - 80:80
+    networks:
+      - appnet
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+       MYSQL_ROOT_PASSWORD: 1234
+       MYSQL_DATABASE: magentodb
+       MYSQL_USER: magentouser
+       MYSQL_PASSWORD: 1234
+    networks:
+      - appnet
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+    container_name: elasticsearch
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 262144
+        hard: 262144
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    networks:
+      - appnet
+
+
+volumes:
+  db_data:
+    driver: "local"
+
+networks:
+  appnet:
+    driver: "bridge"
