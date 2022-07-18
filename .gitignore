@@ -1,3 +1,4 @@
 .vagrant
 *.test
 *.pem
+docker/magento/auth.json
