@@ -16,6 +16,7 @@ services:
       - 80:80
     networks:
       - appnet
+    command: /etc/wait-for-it.sh magento:80 -t 300 -- nginx -g 'daemon off;'
 
   db:
     image: mysql:5.7
