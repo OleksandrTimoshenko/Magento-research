@@ -1,14 +1,19 @@
 version: '3'
 services:
   magento:
-    image: magento
-    build: magento
+    build:
+      context: magento
+      args:
+        PHP_VERSION: 8.1
+        MAGENTO_VERSION: 2.4.4
     networks:
       - appnet
     command: /opt/magento2/start_magento.sh
     depends_on:
       - db
       - elasticsearch
+    expose:
+      - 80
 
   nginx:
     build: nginx-front
@@ -22,8 +27,6 @@ services:
     image: mysql:5.7
     volumes:
       - db_data:/var/lib/mysql
-    ports:
-      - 3306:3306
     environment:
        MYSQL_ROOT_PASSWORD: 1234
        MYSQL_DATABASE: magentodb
@@ -31,6 +34,8 @@ services:
        MYSQL_PASSWORD: 1234
     networks:
       - appnet
+    expose:
+      - 3306
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
@@ -55,4 +60,3 @@ volumes:
 
 networks:
   appnet:
-    driver: "bridge"
