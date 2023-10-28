@@ -7,8 +7,9 @@
 5. For delete vagrant environment - `make destroy-vagrant`
 
 ## Docker installation
-1. provide Magento username && password into ./docker/magento/auth.json.example
-2. cp ./docker/magento/auth.json.example ./docker/magento/auth.json
-3. cd ./docker
-4. docker-compose up
+1. provide Magento username && password into `./docker/magento/auth.json.example`
+2. `cp ./docker/magento/auth.json.example ./docker/magento/auth.json`
+3. `cp .env.example.docker ./docker/.env`
+3. `cd ./docker`
+4. `docker-compose up`
 5. Go to [magetno](http://localhost)

@@ -2,4 +2,5 @@
 *.test
 *.pem
 .env_*
+.env
 docker/magento/auth.json
