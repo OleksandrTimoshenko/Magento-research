@@ -1,6 +1,7 @@
 FROM ubuntu:20.04
 
 ARG PHP_VERSION=8.1
+ARG MAGENTO_VERSION=2.4.4
 
 RUN apt update && \
     apt install software-properties-common -y && \
@@ -23,7 +24,7 @@ RUN apt install php$PHP_VERSION-bcmath \
                 curl \
                 nginx -y
 
-ADD magento.conf /etc/nginx/sites-enabled/magento.conf
+ADD ./magento/magento.conf /etc/nginx/sites-enabled/magento.conf
 
 RUN sed -i 's/file_uploads = Off/file_uploads = On/g' /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i 's/allow_url_fopen = Off/allow_url_fopen = On/g' /etc/php/$PHP_VERSION/fpm/php.ini && \
@@ -38,10 +39,11 @@ RUN sed -i 's/file_uploads = Off/file_uploads = On/g' /etc/php/$PHP_VERSION/fpm/
 RUN curl -sS https://getcomposer.org/installer -o composer-setup.php && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
-COPY auth.json /root/.config/composer/auth.json
+COPY ./magento/auth.json /root/.config/composer/auth.json
 
-RUN composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.4.4 /opt/magento2
+RUN composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=${MAGENTO_VERSION} /opt/magento2
 
 WORKDIR /opt/magento2
 
-ADD start_magento.sh /opt/magento2/start_magento.sh
+ADD ./magento/start_magento.sh /opt/magento2/start_magento.sh
+ADD wait-for-it.sh /opt/wait-for-it.sh
