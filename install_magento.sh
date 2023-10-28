@@ -1,9 +1,12 @@
-#!/bin/sh
-MYSQL_PASS="1234"
-PHP_VERSION="8.1"
-MAGENTO_USER="<your_magento_user>"
-MAGENTO_PASSWORD="your_magento_password"
-DOMAIN_NAME="magento.feature-testing.link"
+#!/bin/bash
+
+# Source the .env file to load environment variables
+if [ -f /vagrant/.env_local ]; then
+    source /vagrant/.env_local
+else
+    echo "Error: .env_local file not found."
+    exit 1
+fi
 
 echo "Install and setup PHP-$PHP_VERSION"
 apt update
@@ -60,9 +63,9 @@ y
 y
 EOF
 cat > /tmp/mysql_setup.sql << EOF
-CREATE DATABASE magentodb;
-CREATE USER 'magentouser'@'localhost' IDENTIFIED BY '1234';
-GRANT ALL ON magentodb.* TO 'magentouser'@'localhost' IDENTIFIED BY '1234' WITH GRANT OPTION;
+CREATE DATABASE $DB_NAME;
+CREATE USER '$DB_USER'@'$DB_HOST' IDENTIFIED BY '$DB_PASS';
+GRANT ALL ON $DB_NAME.* TO '$DB_USER'@'$DB_HOST' IDENTIFIED BY '$DB_PASS' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EOF
 mysql -u root -p$MYSQL_PASS < /tmp/mysql_setup.sql
@@ -90,13 +93,14 @@ cat > /root/.config/composer/auth.json << EOF
     }
 }
 EOF
-composer create-project -n --repository-url=https://repo.magento.com/ magento/project-community-edition=2.4.4 /opt/magento2
+composer create-project -n --repository-url=https://repo.magento.com/ magento/project-community-edition=$MAGENTO_VERSION /opt/magento2
 cd /opt/magento2
-# creds for connect to admin: admin admin123
-bin/magento setup:install --base-url=http://$DOMAIN_NAME --db-host=localhost --db-name=magentodb --db-user=magentouser --db-password=1234 --admin-firstname=admin --admin-lastname=admin --admin-email=admin@admin.com --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1
+bin/magento setup:install --base-url=http://$DOMAIN_NAME --db-host=$DB_HOST --db-name=$DB_NAME --db-user=$DB_USER --db-password=$DB_PASS --admin-firstname=$ADMIN_FIRSTNAME --admin-lastname=$ADMIN_LASTNAME --admin-email=$ADMIN_EMAIL --admin-user=$ADMIN_USER --admin-password=$ADMIN_PASS --language=$MAGENTO_LANGUAGE --currency=$MAGENTO_CURRENCY --timezone=$MAGENTO_TIMEZONE --use-rewrites=1
 chown -R www-data. /opt/magento2
 sudo -u www-data bin/magento module:disable Magento_TwoFactorAuth
 sudo -u www-data bin/magento cache:flush
 sudo -u www-data bin/magento cron:install
 
 sudo systemctl start nginx
+
+echo "127.0.0.1 $DOMAIN_NAME" | sudo tee -a /etc/hosts
