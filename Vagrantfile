@@ -1,19 +1,13 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
 Vagrant.configure("2") do |config|
-    #vagrant plugin install vagrant-env
-    #config.env.enable
-    config.vm.provider "virtualbox" do |v|
-      v.memory = 6048
-      v.cpus = 4
-    end
-    config.vm.define "server" do |machine|
-      config.vm.network :public_network, ip: "192.168.0.160", bridge: "wlp0s20f3" #"wlp4s0"
-      config.vm.box = "bento/ubuntu-20.04"
-      #machine.vm.provision :ansible do |ansible|
-      #  ansible.playbook = ENV["PLAYBOOK_NAME"]
-      # ansible.verbose = 'vv'
-      #end
+  config.vm.define "master" do |master|
+    master.vm.box = "bento/ubuntu-20.04"
+    master.vm.network :public_network, ip: ENV["VAGRANT_IP"], bridge: "wlp0s20f3" #"wlp4s0"
+    master.vm.provision "file", source: "./install_magento.sh", destination: "install_magento.sh"
+    master.vm.provision "file", source: "./.env_local", destination: ".env_local"
+    master.vm.provider "virtualbox" do |vb|
+      vb.memory = "6048"
+      vb.cpus = "4"
     end
   end
+  config.vm.provision "shell", run: "once",   path: "install_magento.sh"   # run in first time (or with --provision flag)
+end
