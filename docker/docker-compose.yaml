@@ -2,7 +2,8 @@ version: '3'
 services:
   magento:
     build:
-      context: magento
+      context: .
+      dockerfile: magento/Dockerfile
       args:
         PHP_VERSION: 8.1
         MAGENTO_VERSION: 2.4.4
@@ -14,9 +15,13 @@ services:
       - elasticsearch
     expose:
       - 80
+    env_file:
+      - .env
 
   nginx:
-    build: nginx-front
+    build:
+      context: .
+      dockerfile: nginx-front/Dockerfile
     ports:
       - 80:80
     networks:
@@ -27,11 +32,8 @@ services:
     image: mysql:5.7
     volumes:
       - db_data:/var/lib/mysql
-    environment:
-       MYSQL_ROOT_PASSWORD: 1234
-       MYSQL_DATABASE: magentodb
-       MYSQL_USER: magentouser
-       MYSQL_PASSWORD: 1234
+    env_file:
+      - .env
     networks:
       - appnet
     expose:
