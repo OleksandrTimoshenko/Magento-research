@@ -101,6 +101,18 @@ sudo -u www-data bin/magento module:disable Magento_TwoFactorAuth
 sudo -u www-data bin/magento cache:flush
 sudo -u www-data bin/magento cron:install
 
+# Install sample data
+sudo cp /root/.config/composer/auth.json /opt/magento2
+sudo chown -R www-data. /var/www
+sudo -u www-data composer require magento/module-bundle-sample-data magento/module-widget-sample-data magento/module-theme-sample-data magento/module-catalog-sample-data magento/module-customer-sample-data magento/module-cms-sample-data  magento/module-catalog-rule-sample-data magento/module-sales-rule-sample-data magento/module-review-sample-data magento/module-tax-sample-data magento/module-sales-sample-data magento/module-grouped-product-sample-data magento/module-downloadable-sample-data magento/module-msrp-sample-data magento/module-configurable-sample-data magento/module-product-links-sample-data magento/module-wishlist-sample-data magento/module-swatches-sample-data magento/sample-data-media magento/module-offline-shipping-sample-data --no-update
+sudo -u www-data composer update
+sudo -u www-data bin/magento module:enable Magento_CustomerSampleData Magento_MsrpSampleData Magento_CatalogSampleData Magento_DownloadableSampleData Magento_OfflineShippingSampleData Magento_BundleSampleData Magento_ConfigurableSampleData Magento_ThemeSampleData Magento_ProductLinksSampleData Magento_ReviewSampleData Magento_CatalogRuleSampleData Magento_SwatchesSampleData Magento_GroupedProductSampleData Magento_TaxSampleData Magento_CmsSampleData Magento_SalesRuleSampleData Magento_SalesSampleData Magento_WidgetSampleData Magento_WishlistSampleData
+sudo rm -rf var/cache/* var/page_cache/* var/generation/*
+sudo -u www-data bin/magento setup:upgrade
+sudo -u www-data bin/magento setup:di:compile
+sudo -u www-data bin/magento indexer:reindex
+sudo -u www-data bin/magento setup:static-content:deploy -f
+
 sudo systemctl start nginx
 
 echo "127.0.0.1 $DOMAIN_NAME" | sudo tee -a /etc/hosts
